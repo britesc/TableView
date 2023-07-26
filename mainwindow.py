@@ -1,16 +1,17 @@
-# from PySide6 import (
-#     QtGui,
-#     QtCore
-# )
+from PySide6 import (
+    QtGui,
+    QtCore
+)
 
-# from PySide6.QtCore import (
-#     QSize
-# )
+from PySide6.QtCore import (
+    QSize
+)
     
-# from PySide6.QtGui import (
-#     QAction,
-#     QIcon,
-# )
+from PySide6.QtGui import (
+    QAction,
+    QIcon,
+    QPixmap
+)
     
 from PySide6.QtWidgets import (
     QMainWindow,
@@ -24,12 +25,13 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     # QVBoxLayout,
     # QHBoxLayout,
-    # QTableView
+    # QTableView,
+    QLabel
 )    
 
-# from PySide6.QtCore import (
-#     Qt
-# )
+from PySide6.QtCore import (
+    Qt
+)
 
 from sqlitedict import (
     SqliteDict
@@ -100,7 +102,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
     def makeHeader(self) -> None:
         headerCounter = 0
-        valueList =[]
+        # valueList =[]
         for key, item in self.database.items():
             # print("%s=%s" % (key, item))
             # print(f"{key}={item}")
@@ -120,10 +122,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #self.tableWidget.setItem(columnCounter,0, QTableWidgetItem(key))
             # print(f"{key}={item}")
             valueList = list(item.values())
-            print(valueList[0])
+            # print(valueList[0])
             self.tableWidget.setItem(rowCounter,1, QTableWidgetItem(valueList[0]))
             self.tableWidget.setItem(rowCounter,2, QTableWidgetItem(valueList[1]))
             self.tableWidget.setItem(rowCounter,3, QTableWidgetItem(valueList[2]))
             self.tableWidget.setItem(rowCounter,4, QTableWidgetItem(valueList[3]))
             self.tableWidget.setItem(rowCounter,5, QTableWidgetItem(valueList[4]))
+            
+            icon_size = QSize(24,24)
+            icon_label = QLabel()
+            icon_label.setMaximumSize(icon_size)
+            icon_label.resize(icon_size)
+            icon_pixmap = QPixmap("about.png")
+            icon_pixmap = icon_pixmap.scaled(24,24, Qt.KeepAspectRatio)
+            icon_label.setPixmap(icon_pixmap)
+            icon_label.setScaledContents(True)
+            icon_label.resize(icon_size)
+            self.tableWidget.setCellWidget(rowCounter,0, icon_label)
+
+            
+            
+            
             rowCounter = rowCounter + 1
