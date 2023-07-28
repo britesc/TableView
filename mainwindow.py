@@ -19,14 +19,14 @@ from PySide6.QtWidgets import (
     # QPushButton,
     # QStatusBar,
     # QApplication,
-    # QHeaderView,
+    QHeaderView,
     # QAbstractItemView,
     QTableWidget,
     QTableWidgetItem,
     # QVBoxLayout,
     # QHBoxLayout,
     # QTableView,
-    QLabel
+    QLabel,
 )    
 
 from PySide6.QtCore import (
@@ -82,6 +82,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.keylist = [i.title() for i in self.keylist]
         # self.tableWidget.setColumnCount(len(self.keylist))
         # self.tableWidget.setHorizontalHeaderLabels(self.keylist)
+        
+        self.pushButton1_New.clicked.connect(self._rowAdd)  # type: ignore
+        self.pushButton2_Save.clicked.connect(self._rowSave)  # type: ignore
+        self.pushButton3_Delete.clicked.connect(self._rowDelete)  # type: ignore
+        self.tableWidget.cellClicked.connect(self._rowSelected)
+        self.tableWidget.verticalHeader.clicked.connect(self._rowSelected)
 
     def setupDatabase(self) -> None:
         self.databaseName = 'projectionist.db'
@@ -113,7 +119,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 headerCounter = 1
         self.keylist = [i.title() for i in self.keylist]
         self.tableWidget.setColumnCount(len(self.keylist))
-        self.tableWidget.setHorizontalHeaderLabels(self.keylist)     
+        self.tableWidget.setHorizontalHeaderLabels(self.keylist)  
+        
+        self.tableWidget.horizontalHeader().resizeSection(0, 16)
+        self.tableWidget.horizontalHeader().resizeSection(1, 250)
+        self.tableWidget.horizontalHeader().resizeSection(2, 250)
+        self.tableWidget.horizontalHeader().resizeSection(4, 150)
+        self.tableWidget.horizontalHeader().resizeSection(5, 150)
+            
+        self.tableWidget.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)   # noqa: E501 # icon
+        self.tableWidget.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Interactive)   # noqa: E501 # app
+        self.tableWidget.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Interactive)   # noqa: E501 # alias
+        self.tableWidget.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)   # noqa: E501 # location
+        self.tableWidget.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Interactive)   # noqa: E501 # version
+        self.tableWidget.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)   # noqa: E501 # type
+                                                                 
         
     def populateTable(self) -> None:   
         rowCounter = 0
@@ -128,19 +148,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tableWidget.setItem(rowCounter,3, QTableWidgetItem(valueList[2]))
             self.tableWidget.setItem(rowCounter,4, QTableWidgetItem(valueList[3]))
             self.tableWidget.setItem(rowCounter,5, QTableWidgetItem(valueList[4]))
+            self.tableWidget.setSortingEnabled(True)
             
             icon_size = QSize(24,24)
             icon_label = QLabel()
             icon_label.setMaximumSize(icon_size)
             icon_label.resize(icon_size)
-            icon_pixmap = QPixmap("about.png")
+            make_icon = f"resources/Images/png/{valueList[0]}.png"
+            icon_pixmap = QPixmap(make_icon)
+            # icon_pixmap = QPixmap("resources/Images/png/about.png")            
             icon_pixmap = icon_pixmap.scaled(24,24, Qt.KeepAspectRatio)
             icon_label.setPixmap(icon_pixmap)
             icon_label.setScaledContents(True)
             icon_label.resize(icon_size)
             self.tableWidget.setCellWidget(rowCounter,0, icon_label)
-
-            
-            
-            
             rowCounter = rowCounter + 1
+            
+    def _rowAdd(self) -> None:
+        rowPosition = self.tableWidget.rowCount()
+        self.tableWidget.insertRow(rowPosition)
+        
+    def _rowDelete(self) -> None:
+        rowPosition = self.tableWidget.currentRow()
+        print(f"Deleting Row {rowPosition}")
+        self.tableWidget.removeRow(rowPosition)
+        self.tableWidget.selectRow(rowPosition)
+    
+    def _rowSave(self) -> None:
+        rowPosition = self.tableWidget.currentRow()
+        print(f"Saving Row {rowPosition}")
+    
+    def _rowSelected(self) -> None:
+        rowPosition = self.tableWidget.currentRow()
+        print(f"Selected Row {rowPosition}")
+        
