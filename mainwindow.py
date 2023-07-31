@@ -51,10 +51,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupDatabase()
 
         self.table_widget = QTableWidget()
-        # self.mylist = []
-        # self.new_list = []
         self.counter=0
         self.keylist = []
+        self.icon_width = 36
+        self.icon_height = 36
 
         self.tableWidget.setRowCount(self.databaseRecords)
 
@@ -127,7 +127,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tableWidget.setItem(rowCounter,5, QTableWidgetItem(valueList[4]))
             self.tableWidget.setSortingEnabled(True)
             
-            icon_size = QSize(36,36)
+            icon_size = QSize(self.icon_width, self.icon_height)
             icon_label = QLabel()
             icon_label.setMaximumSize(icon_size)
             icon_label.resize(icon_size)
@@ -141,7 +141,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     
             icon_pixmap = QPixmap(make_icon)
         
-            icon_pixmap = icon_pixmap.scaled(36,36, Qt.KeepAspectRatio)  # type: ignore
+            icon_pixmap = icon_pixmap.scaled(self.icon_width, self.icon_height, Qt.KeepAspectRatio)  # type: ignore
             icon_label.setPixmap(icon_pixmap)
             icon_label.setScaledContents(True)
             icon_label.resize(icon_size)
