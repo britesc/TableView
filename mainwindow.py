@@ -65,40 +65,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.vAppAlias = ""
         self.vLocation = ""
         self.vVersion = ""
-        self.vType = ""
-        
-        
-        # self.tableWidget.setItem(0,0, QTableWidgetItem("Name"))
-        # for key, item in self.database.items():
-        #     # print("%s=%s" % (key, item))
-        #     # print(f"{key}={item}")
-        #     self.tableWidget.setItem(self.counter,0, QTableWidgetItem("Name"))
-        #     if not self.counter: 
-        #         self.keylist = list(item)
-        #         self.keylist.insert(0,"icon")
-        #         # self.keylist = list(item)
-                
-        #     self.counter += 1
-                
-                
-            # self.my_list = list(self.database.keys())
-            # self.mylist.append(str(key))
-            # self.new_list = list(set(self.mylist))
-            
-        # print(f" MyList {self.mylist}")    
-        # print(f" NewList {self.my_list}")
-        # print(f"Item = {self.keylist}")
-        # print(f"Length = {len(self.keylist)}")
-        # self.keylist = [i.title() for i in self.keylist]
-        # self.tableWidget.setColumnCount(len(self.keylist))
-        # self.tableWidget.setHorizontalHeaderLabels(self.keylist)
-        
+        self.vType = ""                
+                        
         self.pushButton1_New.clicked.connect(self._rowAdd)  # type: ignore
         self.pushButton2_Save.clicked.connect(self._rowSave)  # type: ignore
         self.pushButton3_Delete.clicked.connect(self._rowDelete)  # type: ignore
         self.tableWidget.cellClicked.connect(self._rowSelected) # type: ignore
         
         self.pushButton2_Save.setEnabled(False)
+        self.pushButton3_Delete.setEnabled(False)
 
 
     def setupDatabase(self) -> None:
@@ -182,7 +157,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         rowPosition = self.tableWidget.currentRow()
         print(f"Deleting Row {rowPosition}")
         self.tableWidget.removeRow(rowPosition)
+        self.database.pop(f"{self.vAppReal}")
+        
+        
         self.tableWidget.selectRow(rowPosition)
+        
     
     def _rowSave(self) -> None:  # sourcery skip: class-extract-method
         # rowPosition = self.tableWidget.currentRow()
@@ -204,6 +183,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.database.commit()  # type: ignore 
     
     def _rowSelected(self) -> None:
+        self.pushButton3_Delete.setEnabled(True)
         rowPosition = self.tableWidget.currentRow()
         # print(f"Selected Row {rowPosition}")
 
