@@ -1,10 +1,13 @@
+import os
+
 from PySide6 import (
     QtGui,
     QtCore
 )
 
 from PySide6.QtCore import (
-    QSize
+    QSize,
+    QFileInfo
 )
     
 from PySide6.QtGui import (
@@ -54,10 +57,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.keylist = []
 
         self.tableWidget.setRowCount(self.databaseRecords)
-        # self.tableWidget.setColumnCount(8)
-        # self.tableWidget.setHorizontalHeaderLabels(["Name", "Hex Code", "Color"])
+
         self.makeHeader()
         self.populateTable()
+        
+        self.vAppReal = ""
+        self.vAppAlias = ""
+        self.vLocation = ""
+        self.vVersion = ""
+        self.vType = ""
+        
+        
         # self.tableWidget.setItem(0,0, QTableWidgetItem("Name"))
         # for key, item in self.database.items():
         #     # print("%s=%s" % (key, item))
@@ -86,8 +96,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton1_New.clicked.connect(self._rowAdd)  # type: ignore
         self.pushButton2_Save.clicked.connect(self._rowSave)  # type: ignore
         self.pushButton3_Delete.clicked.connect(self._rowDelete)  # type: ignore
-        self.tableWidget.cellClicked.connect(self._rowSelected)
-        self.tableWidget.verticalHeader.clicked.connect(self._rowSelected)
+        self.tableWidget.cellClicked.connect(self._rowSelected) # type: ignore
+        
+        self.pushButton2_Save.setEnabled(False)
+
 
     def setupDatabase(self) -> None:
         self.databaseName = 'projectionist.db'
@@ -99,24 +111,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         )
         self.databaseRecords = len(self.database)
         
-        # con = sqlite3.connect("projectionist.db")
-        # cur = con.cursor()
-        # res = cur.execute("SELECT key FROM Apps LIMIT 1")
-        # self.first_row = res.fetchone()
-        # print(f"First Row is {self.first_row}")
-        # con.close()
-        
     def makeHeader(self) -> None:
         headerCounter = 0
-        # valueList =[]
         for key, item in self.database.items():
-            # print("%s=%s" % (key, item))
-            # print(f"{key}={item}")
             if not headerCounter: 
                 self.keylist = list(item)
                 self.keylist.insert(0,"icon")
-                # self.keylist = list(item)
                 headerCounter = 1
+
         self.keylist = [i.title() for i in self.keylist]
         self.tableWidget.setColumnCount(len(self.keylist))
         self.tableWidget.setHorizontalHeaderLabels(self.keylist)  
@@ -133,16 +135,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tableWidget.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)   # noqa: E501 # location
         self.tableWidget.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Interactive)   # noqa: E501 # version
         self.tableWidget.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)   # noqa: E501 # type
-                                                                 
         
-    def populateTable(self) -> None:   
+    def populateTable(self) -> None:     # sourcery skip: use-named-expression
         rowCounter = 0
         valueList = []
+        icon_location = "/home/julian/Downloads/logos/Dones/"
+
         for key, item in self.database.items():
-            #self.tableWidget.setItem(columnCounter,0, QTableWidgetItem(key))
-            # print(f"{key}={item}")
+
             valueList = list(item.values())
-            # print(valueList[0])
+
             self.tableWidget.setItem(rowCounter,1, QTableWidgetItem(valueList[0]))
             self.tableWidget.setItem(rowCounter,2, QTableWidgetItem(valueList[1]))
             self.tableWidget.setItem(rowCounter,3, QTableWidgetItem(valueList[2]))
@@ -150,14 +152,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.tableWidget.setItem(rowCounter,5, QTableWidgetItem(valueList[4]))
             self.tableWidget.setSortingEnabled(True)
             
-            icon_size = QSize(24,24)
+            icon_size = QSize(36,36)
             icon_label = QLabel()
             icon_label.setMaximumSize(icon_size)
             icon_label.resize(icon_size)
-            make_icon = f"resources/Images/png/{valueList[0]}.png"
+                        
+            icon_to_test = f"{icon_location}{valueList[0]}.png"
+            
+            if os.path.isfile(icon_to_test):
+                make_icon = f"{icon_location}{valueList[0]}.png"
+            else:
+                make_icon = f"{icon_location}notfound.png"
+                    
             icon_pixmap = QPixmap(make_icon)
-            # icon_pixmap = QPixmap("resources/Images/png/about.png")            
-            icon_pixmap = icon_pixmap.scaled(24,24, Qt.KeepAspectRatio)
+        
+            icon_pixmap = icon_pixmap.scaled(36,36, Qt.KeepAspectRatio)  # type: ignore
             icon_label.setPixmap(icon_pixmap)
             icon_label.setScaledContents(True)
             icon_label.resize(icon_size)
@@ -167,6 +176,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def _rowAdd(self) -> None:
         rowPosition = self.tableWidget.rowCount()
         self.tableWidget.insertRow(rowPosition)
+        self.pushButton2_Save.setEnabled(True)
         
     def _rowDelete(self) -> None:
         rowPosition = self.tableWidget.currentRow()
@@ -174,11 +184,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tableWidget.removeRow(rowPosition)
         self.tableWidget.selectRow(rowPosition)
     
-    def _rowSave(self) -> None:
-        rowPosition = self.tableWidget.currentRow()
-        print(f"Saving Row {rowPosition}")
+    def _rowSave(self) -> None:  # sourcery skip: class-extract-method
+        # rowPosition = self.tableWidget.currentRow()
+        self.pushButton2_Save.setEnabled(False)
+        # print(f"Saving Row {rowPosition}")
+        # print(f"self.vAppReal = {self.vAppReal}")
+        # print(f"self.vAppAlias = {self.vAppAlias}")
+        # print(f"self.vLocation = {self.vLocation}")
+        # print(f"self.vVersion = {self.vVersion}")
+        # print(f"self.vType = {self.vType}")
+                
+        self.database[f"{self.vAppReal}"] = {
+            'app': self.vAppReal,
+            'alias': self.vAppAlias,
+            'location': self.vLocation,
+            'version': self.vVersion,
+            'type': self.vType
+            }
+        self.database.commit()  # type: ignore 
     
     def _rowSelected(self) -> None:
         rowPosition = self.tableWidget.currentRow()
-        print(f"Selected Row {rowPosition}")
-        
+        # print(f"Selected Row {rowPosition}")
+
+        if self.tableWidget.item(rowPosition, 1):
+            self.vAppReal = self.tableWidget.item(rowPosition, 1).text()
+        if self.tableWidget.item(rowPosition, 2):
+            self.vAppAlias = self.tableWidget.item(rowPosition, 2).text()
+        if self.tableWidget.item(rowPosition, 3):
+            self.vLocation = self.tableWidget.item(rowPosition, 3).text()
+        if self.tableWidget.item(rowPosition, 4):
+            self.vVersion = self.tableWidget.item(rowPosition, 4).text()
+        if self.tableWidget.item(rowPosition, 5):
+            self.vType = self.tableWidget.item(rowPosition, 5).text()
+
+        # print(f"self.vAppReal = {self.vAppReal}")
+        # print(f"self.vAppAlias = {self.vAppAlias}")
+        # print(f"self.vLocation = {self.vLocation}")
+        # print(f"self.vVersion = {self.vVersion}")
+        # print(f"self.vType = {self.vType}")
